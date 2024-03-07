@@ -2,6 +2,7 @@ package client;
 
 import java.io.*;
 import java.net.*;
+import java.util.Scanner;
 
 /**
  * Esta classe implementa um cliente TCP simples em Java.
@@ -12,6 +13,8 @@ import java.net.*;
  */
 public class Client {
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
         // Definindo o endereço do servidor
         final String SERVER_ADDRESS = "localhost";
         // Definindo a porta do servidor
@@ -20,10 +23,13 @@ public class Client {
         try (Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT)) {
             // Conexão estabelecida com o servidor
             System.out.println("Conexão estabelecida com o servidor.");
+            
+            System.out.println("Insira uma mensagem.");
+            String msg = scanner.nextLine();
 
             // Enviando uma mensagem de teste para o servidor
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            out.println("Mensagem de teste do cliente.");
+            out.println(msg);
 
             // Recebendo a resposta do servidor
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
