@@ -1,9 +1,8 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
-package codecomchat;
-
+package server;
 import java.io.*;
 import java.net.*;
 /**
@@ -11,7 +10,12 @@ import java.net.*;
  * @author admin_hachiman
  */
 public class Server {
-    
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        // TODO code application logic here
         final int PORT = 12345;
         try (ServerSocket serverSocket = new ServerSocket(PORT)){
             //aguarda por conexoes de clientes
@@ -25,5 +29,6 @@ public class Server {
         } catch (IOException e){
             e.printStackTrace();
         }
+    }
     
 }
