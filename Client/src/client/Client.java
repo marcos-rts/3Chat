@@ -1,38 +1,38 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package client;
+
 import java.io.*;
 import java.net.*;
+
 /**
- *
- * @author admin_hachiman
+ * Esta classe implementa um cliente TCP simples em Java.
+ * Ela se conecta a um servidor na mesma máquina (localhost) na porta 12345.
+ * O cliente envia uma mensagem de teste para o servidor e imprime a resposta recebida.
+ * 
+ * @author Marcos Alexandre R. T. dos Santos
  */
 public class Client {
-
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
-        // TODO code application logic here
-        final String SERVER_ADDRESS = "localhost"; // Endereço do servidor
-        final int SERVER_PORT = 12345; // Porta do servidor
+        // Definindo o endereço do servidor
+        final String SERVER_ADDRESS = "localhost";
+        // Definindo a porta do servidor
+        final int SERVER_PORT = 12345;
 
         try (Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT)) {
+            // Conexão estabelecida com o servidor
             System.out.println("Conexão estabelecida com o servidor.");
 
-            // Envia uma mensagem de teste para o servidor
+            // Enviando uma mensagem de teste para o servidor
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             out.println("Mensagem de teste do cliente.");
 
-            // Recebe a resposta do servidor
+            // Recebendo a resposta do servidor
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String response = in.readLine();
             System.out.println("Resposta do servidor: " + response);
         } catch (IOException e) {
+            // Exceção ocorreu, imprime o rastreamento da pilha
             e.printStackTrace();
         }
     }
-    
 }
+
