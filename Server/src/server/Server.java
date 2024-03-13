@@ -28,7 +28,7 @@ public class Server {
             System.out.println("Servidor iniciando. Aguardando conexoes...");
             
             // Carrega as informações de conexão do arquivo de propriedades
-            Properties properties = loadProperties("src/server/db.properties");
+            Properties properties = loadProperties("db.properties");
             if (properties == null) {
                 System.err.println("Erro ao carregar as propriedades do banco de dados.");
                 return;
@@ -68,7 +68,7 @@ public class Server {
      * @return um objeto Properties contendo as informações de conexão, ou null se ocorrer um erro
      */
     private static Properties loadProperties(String filename) {
-        try (FileInputStream fileInputStream = new FileInputStream(filename)) {
+        try (FileInputStream fileInputStream = new FileInputStream("src/server/"+filename)) {
             Properties properties = new Properties();
             properties.load(fileInputStream);
             return properties;
@@ -84,17 +84,24 @@ public class Server {
      * @param properties o objeto Properties contendo as informações de conexão
      * @return a conexão com o banco de dados, ou null se ocorrer um erro
      */
-    private static Connection getConnection(Properties properties) {
-        try {
-            String url = properties.getProperty("db.url");
-            String usuario = properties.getProperty("db.username");
-            String senha = properties.getProperty("db.password");
-            return DriverManager.getConnection(url, usuario, senha);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
+private static Connection getConnection(Properties properties) {
+    try {
+        // Carregar o driver JDBC do MariaDB
+        Class.forName("oracle.jdbc.driver");
+        
+        String url = properties.getProperty("db.url");
+        String usuario = properties.getProperty("db.username");
+        String senha = properties.getProperty("db.password");
+        return DriverManager.getConnection(url, usuario, senha);
+    } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+        return null;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return null;
     }
+}
+
         
     /**
      * Método para autenticar o cliente com o banco de dados.
