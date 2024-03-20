@@ -74,29 +74,38 @@ public class Server {
 
     private static boolean autenticarCliente(Connection connection, Socket clientSocket) {
         try {
-            // Crie os fluxos de entrada e saída para comunicação com o cliente
             BufferedReader input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
 
-            // Solicite ao cliente as credenciais de login
             output.println("Digite seu nome de usuário:");
             String username = input.readLine();
             output.println("Digite sua senha:");
             String password = input.readLine();
 
-            // Verifique as credenciais do usuário no banco de dados
-            String sql = "SELECT * FROM Usuarios WHERE username = ? AND password = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, username);
-            statement.setString(2, password);
+            // Verifica se o usuário é um administrador
+            String adminSql = "SELECT * FROM Administradores WHERE username = ? AND password = ?";
+            PreparedStatement adminStatement = connection.prepareStatement(adminSql);
+            adminStatement.setString(1, username);
+            adminStatement.setString(2, password);
+            ResultSet adminResultSet = adminStatement.executeQuery();
+            boolean isAdmin = adminResultSet.next();
 
-            ResultSet resultSet = statement.executeQuery();
+            if (isAdmin) {
+                output.println("Autenticação bem-sucedida como administrador.");
+                System.out.println("Autenticação bem-sucedida para o administrador: " + username);
+                return true;
+            }
 
-            // Se houver um resultado na consulta, o usuário foi autenticado com sucesso
-            boolean authenticated = resultSet.next();
+            // Verifique as credenciais do usuário na tabela de usuários
+            String userSql = "SELECT * FROM Usuarios WHERE username = ? AND password = ?";
+            PreparedStatement userStatement = connection.prepareStatement(userSql);
+            userStatement.setString(1, username);
+            userStatement.setString(2, password);
+            ResultSet userResultSet = userStatement.executeQuery();
+            boolean isAuthenticated = userResultSet.next();
 
             // Envia mensagem de autenticação ao cliente
-            if (authenticated) {
+            if (isAuthenticated) {
                 output.println("Autenticação bem-sucedida.");
                 System.out.println("Autenticação bem-sucedida para o usuário: " + username);
             } else {
@@ -104,35 +113,11 @@ public class Server {
                 System.out.println("Falha na autenticação para o usuário: " + username);
             }
 
-            return authenticated;
+            return isAuthenticated;
         } catch (IOException | SQLException e) {
             e.printStackTrace();
             System.err.println("Erro de comunicação com o cliente.");
             return false;
-        }
-    }
-
-    // Método para exibir a lista de usuários no banco de dados
-    private static void exibirListaUsuarios(Connection connection) {
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM Usuarios");
-            System.out.println("Lista de usuários no banco de dados:");
-            while (resultSet.next()) {
-                String username = resultSet.getString("username");
-                System.out.println(username);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.err.println("Erro ao obter a lista de usuários.");
-        }
-    }
-
-    // Método para exibir informações sobre os clientes conectados e offline
-    private static void exibirInformacoesClientes(List<ClientHandler> clients) {
-        System.out.println("Clientes conectados:");
-        for (ClientHandler client : clients) {
-            System.out.println(client.getClientInfo());
         }
     }
 }
