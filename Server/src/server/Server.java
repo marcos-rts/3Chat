@@ -86,21 +86,16 @@ public class Server {
      */
 private static Connection getConnection(Properties properties) {
     try {
-        // Carregar o driver JDBC do MariaDB
-        Class.forName("oracle.jdbc.driver");
-        
         String url = properties.getProperty("db.url");
         String usuario = properties.getProperty("db.username");
         String senha = properties.getProperty("db.password");
         return DriverManager.getConnection(url, usuario, senha);
-    } catch (ClassNotFoundException e) {
-        e.printStackTrace();
-        return null;
     } catch (SQLException e) {
         e.printStackTrace();
         return null;
     }
 }
+
 
         
     /**
