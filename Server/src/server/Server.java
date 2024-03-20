@@ -1,14 +1,16 @@
 package server;
-
 import java.io.*;
 import java.net.*;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class Server {
 
     public static void main(String[] args) {
         final int PORT = 12345;
+        List<ClientHandler> clients = new ArrayList<>(); // Remova 'final' aqui
 
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Servidor iniciando. Aguardando conexões...");
@@ -30,7 +32,9 @@ public class Server {
                 System.out.println("Novo cliente conectado: " + clientSocket);
                 if (autenticarCliente(connection, clientSocket)) {
                     System.out.println("Cliente autenticado com sucesso.");
-                    new ClientHandler(clientSocket).start();
+                    ClientHandler clientHandler = new ClientHandler(clientSocket, clients);
+                    clients.add(clientHandler); // Adicione o cliente à lista de clientes
+                    clientHandler.start();
                 } else {
                     System.out.println("Falha na autenticação do cliente.");
                     clientSocket.close();
@@ -65,29 +69,39 @@ public class Server {
     }
 
     private static boolean autenticarCliente(Connection connection, Socket clientSocket) {
-        try {
-            // Crie os fluxos de entrada e saída para comunicação com o cliente
-            BufferedReader input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
+    try {
+        // Crie os fluxos de entrada e saída para comunicação com o cliente
+        BufferedReader input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
 
-            // Solicite ao cliente as credenciais de login
-            output.println("Digite seu nome de usuário:");
-            String username = input.readLine();
-            output.println("Digite sua senha:");
-            String password = input.readLine();
+        // Solicite ao cliente as credenciais de login
+        //output.println("Digite seu nome de usuário:");
+        String username = input.readLine();
+        //output.println("Digite sua senha:");
+        String password = input.readLine();
 
-            // Verifique as credenciais do usuário no banco de dados
-            String sql = "SELECT * FROM Usuarios WHERE username = ? AND password = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, username);
-            statement.setString(2, password);
-            ResultSet resultSet = statement.executeQuery();
-            
-            // Se houver um resultado na consulta, o usuário foi autenticado com sucesso
-            return resultSet.next();
-        } catch (IOException | SQLException e) {
-            e.printStackTrace();
-            return false;
+        // Verifique as credenciais do usuário no banco de dados
+        String sql = "SELECT * FROM Usuarios WHERE username = ? AND password = ?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setString(1, username);
+        statement.setString(2, password);
+        ResultSet resultSet = statement.executeQuery();
+        
+        // Se houver um resultado na consulta, o usuário foi autenticado com sucesso
+        boolean authenticated = resultSet.next();
+
+        // Envia mensagem de autenticação ao cliente
+        if (authenticated) {
+            output.println("Autenticação bem-sucedida.");
+        } else {
+            output.println("Autenticação falhou. Verifique seu nome de usuário e senha.");
         }
+
+        return authenticated;
+    } catch (IOException | SQLException e) {
+        e.printStackTrace();
+        return false;
     }
+}
+
 }

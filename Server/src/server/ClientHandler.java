@@ -2,6 +2,7 @@ package server;
 
 import java.io.*;
 import java.net.*;
+import java.util.List;
 
 /**
  * Esta classe implementa o tratamento de cliente em uma thread separada.
@@ -11,36 +12,45 @@ import java.net.*;
  */
 public class ClientHandler extends Thread {
     private final Socket clientSocket;
+    private final BufferedReader input;
+    private final PrintWriter output;
+    private List<ClientHandler> clients;
 
-    // Construtor que recebe o socket do cliente
-    public ClientHandler(Socket clientSocket) {
+    public ClientHandler(Socket clientSocket, List<ClientHandler> clients) throws IOException {
         this.clientSocket = clientSocket;
+        this.clients = clients;
+        this.input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        this.output = new PrintWriter(clientSocket.getOutputStream(), true);
     }
 
     @Override
     public void run() {
         try {
-            PrintWriter out;
-            // Cria um BufferedReader para ler as mensagens do cliente
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
-                // Cria um PrintWriter para enviar mensagens de volta para o cliente
-                out = new PrintWriter(clientSocket.getOutputStream(), true);
-                String message;
-                // Loop para ler mensagens do cliente enquanto houver comunicação
-                while ((message = in.readLine()) != null) {
-                    // Imprime a mensagem do cliente no console do servidor
-                    System.out.println("Mensagem do cliente: " + message);
-                    
-                    // Envia uma mensagem de resposta de volta para o cliente
-                    out.println("Mensagem recebida pelo servidor: " + message);
+            while (true) {
+                String message = input.readLine();
+                if (message == null) {
+                    break;
+                }
+                System.out.println("Mensagem recebida do cliente: " + message);
+                // Encaminhar a mensagem para todos os outros clientes
+                for (ClientHandler client : clients) {
+                    if (client != this) {
+                        client.sendMessage(message);
+                    }
                 }
             }
-            // Fecha o PrintWriter e o socket do cliente quando a comunicação termina
-            out.close();
-            clientSocket.close();
         } catch (IOException e) {
-            // Exceção ocorreu, imprime o rastreamento da pilha
             e.printStackTrace();
+        } finally {
+            try {
+                clientSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    public void sendMessage(String message) {
+        output.println(message);
     }
 }
