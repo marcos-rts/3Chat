@@ -35,28 +35,38 @@ public class Client {
 
             // Lê a mensagem de boas-vindas do servidor
             String welcomeMessage = input.readLine();
-            System.out.println("Servidor: " + welcomeMessage);
+            System.out.println("Mensagem de boas-vindas recebida do servidor: " + welcomeMessage);
 
-            // Solicita ao usuário que digite o nome de usuário e a senha
+            // Solicita ao usuário que digite o nome de usuário
             System.out.print("Digite seu nome de usuário: ");
             String username = userInput.readLine();
             output.println(username);
+
+            // Solicita ao usuário que digite a senha
             System.out.print("Digite sua senha: ");
             String password = userInput.readLine();
             output.println(password);
 
             // Aguarda a resposta do servidor sobre a autenticação
             String authenticationResult = input.readLine();
-            System.out.println("Servidor: " + authenticationResult);
+            System.out.println("Resposta de autenticação do servidor: " + authenticationResult);
 
-            // Loop para enviar mensagens para o servidor
-            while (true) {
-                System.out.print("Digite sua mensagem ('exit' para sair): ");
-                String message = userInput.readLine();
-                if ("exit".equalsIgnoreCase(message)) {
-                    break;
+            // Se a autenticação for bem-sucedida, entra no loop de envio de mensagens
+            if ("Autenticação bem-sucedida.".equals(authenticationResult)) {
+                System.out.println("Autenticação bem-sucedida. Você pode enviar mensagens agora.");
+                System.out.println("Digite 'exit' para sair.");
+
+                // Loop para enviar mensagens para o servidor
+                while (true) {
+                    System.out.print("Digite sua mensagem: ");
+                    String message = userInput.readLine();
+                    output.println(message);
+                    if ("exit".equalsIgnoreCase(message)) {
+                        break;
+                    }
                 }
-                output.println(message);
+            } else {
+                System.out.println("Falha na autenticação. Verifique seu nome de usuário e senha.");
             }
 
             // Fecha a conexão

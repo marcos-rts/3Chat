@@ -4,17 +4,11 @@ import java.io.*;
 import java.net.*;
 import java.util.List;
 
-/**
- * Esta classe implementa o tratamento de cliente em uma thread separada.
- * Ela recebe mensagens dos clientes, imprime no console e envia uma resposta de volta.
- * 
- * @author Marcos Alexandre R. T. dos Santos
- */
 public class ClientHandler extends Thread {
     private final Socket clientSocket;
     private final BufferedReader input;
     private final PrintWriter output;
-    private List<ClientHandler> clients;
+    private final List<ClientHandler> clients;
 
     public ClientHandler(Socket clientSocket, List<ClientHandler> clients) throws IOException {
         this.clientSocket = clientSocket;
@@ -52,5 +46,20 @@ public class ClientHandler extends Thread {
 
     public void sendMessage(String message) {
         output.println(message);
+        output.flush(); // Certifique-se de que a mensagem seja enviada imediatamente
     }
+    
+    public void addClient(ClientHandler client) {
+    clients.add(client);
+}
+
+public void removeClient(ClientHandler client) {
+    clients.remove(client);
+}
+
+    boolean getClientInfo() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+
 }
