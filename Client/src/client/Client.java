@@ -2,43 +2,42 @@ package client;
 
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
 
-/**
- * Esta classe implementa um cliente TCP simples em Java.
- * Ela se conecta a um servidor na mesma máquina (localhost) na porta 12345.
- * O cliente envia uma mensagem de teste para o servidor e imprime a resposta recebida.
- * 
- * @author Marcos Alexandre R. T. dos Santos
- */
 public class Client {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-
-        // Definindo o endereço do servidor
         final String SERVER_ADDRESS = "localhost";
-        // Definindo a porta do servidor
         final int SERVER_PORT = 12345;
 
-        try (Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT)) {
-            // Conexão estabelecida com o servidor
-            System.out.println("Conexão estabelecida com o servidor.");
-            
-            System.out.println("Insira uma mensagem.");
-            String msg = scanner.nextLine();
+        try {
+            // Conecta ao servidor
+            Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
+            System.out.println("Conectado ao servidor.");
 
-            // Enviando uma mensagem de teste para o servidor
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            out.println(msg);
+            // Cria os fluxos de entrada e saída
+            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
 
-            // Recebendo a resposta do servidor
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String response = in.readLine();
-            System.out.println("Resposta do servidor: " + response);
+            // Lê a mensagem de boas-vindas do servidor
+            String welcomeMessage = input.readLine();
+            System.out.println("Servidor: " + welcomeMessage);
+
+            // Solicita ao usuário que digite o nome de usuário e a senha
+            BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
+            System.out.print("Digite seu nome de usuário: ");
+            String username = userInput.readLine();
+            output.println(username);
+            System.out.print("Digite sua senha: ");
+            String password = userInput.readLine();
+            output.println(password);
+
+            // Aguarda a resposta do servidor sobre a autenticação
+            String authenticationResult = input.readLine();
+            System.out.println("Servidor: " + authenticationResult);
+
+            // Fecha a conexão
+            socket.close();
         } catch (IOException e) {
-            // Exceção ocorreu, imprime o rastreamento da pilha
             e.printStackTrace();
         }
     }
 }
-
